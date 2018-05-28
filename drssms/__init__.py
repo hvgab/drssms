@@ -1,2 +1,2 @@
 
-from .NeverAPI import NeverAPI
+from .NeverAPI import NeverAPI  # NOQA

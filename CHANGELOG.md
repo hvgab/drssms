@@ -1,0 +1,23 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [1.0.0] - 2018-05-28
+
+### Added
+- Changelog
+
+### Changed
+- Cleaned codestyle (PEP8++)
+- cli command 'download_sms' is now just 'download'
+
+### Removed
+
+## [0.4.0] - 2018
+- Cleaned all settings out to .env file / env vars.
+- General code cleaning
+- Published to Github?

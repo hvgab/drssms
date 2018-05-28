@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Custom DRS API for Never.no sms-tjenesten.
+    Custom DRS API for sms-tjeneste fra Never.
 '''
 
 import logging
@@ -14,8 +14,10 @@ import requests
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class NeverAPI(object):
     """docstring for NeverAPI."""
+
     def __init__(self, path='./', user_agent=os.getenv('DRSSMS_USERAGENT')):
         super(NeverAPI, self).__init__()
         self.path = path  # gjørra no her ell?
@@ -39,18 +41,18 @@ class NeverAPI(object):
         headers = {'user-agent': self.user_agent}
         response = self.session.post(os.getenv('DRSSMS_LOGIN_URL'), headers=headers, data=logindata)
 
-		# Finner en cookie vi fikk tilbake
+    # Finner en cookie vi fikk tilbake
         cookie_resp = response.request.headers['Cookie']
         # Format cookie
         cookie_send = 'Basic ' + cookie_resp[13:]
 
-		# Set headers on object
+    # Set headers on object
         headers['Authorization'] = cookie_send
         self.headers = headers
         self.logged_in = True
         logger.debug('[+] Logged in')
 
-    def download_sms_file(self, start=None, end=None, download_path=None):
+    def download_sms_file(self, start=None, end=None, filename=None, download_path=None):
         """ Download SMS-Dialog export
             Args:
                 start: date string in format yyyy-mm-dd
@@ -75,8 +77,10 @@ class NeverAPI(object):
             end = end.date().isoformat()
             logger.debug('end: {}'.format(end))
 
-        url = '{baseurl}&from={start}&to={end}&q=&op=messages&action=csv'.format(baseurl=os.getenv('DRSSMS_DOWNLOAD_BASE_URL'), start=start, end=end)
-        local_filename = 'sms_dialoger_start-{start}-end-{end}.csv'.format(start=start, end=end)
+        url = f'{os.getenv("DRSSMS_DOWNLOAD_BASE_URL")}&from={start}&to={end}&q=&op=messages&action=csv'
+        local_filename = filename
+        if filename is None:
+            local_filename = f'sms_dialoger_start-{start}-end-{end}.csv'
         local_filepath = os.path.join(download_path, local_filename)
 
         # Kopierer raw bytes rett til fil.
@@ -100,7 +104,7 @@ class NeverAPI(object):
         logger.debug('[~] Send service SMS')
 
         if message == '':
-            message=None
+            message = None
 
         phone = int(phone)
 
@@ -109,25 +113,24 @@ class NeverAPI(object):
 
         url = os.getenv('DRSSMS_SERVICE_URL')
         smsdata = {
-            'service':serviceID
-            ,'phone':phone
-            ,'msgfromscript':message
-            ,'submit':'1'
+            'service': serviceID,
+            'phone': phone,
+            'msgfromscript': message,
+            'submit': '1'
         }
         sms = self.session.post(url, headers=self.headers, data=smsdata)
 
-        status = None
+        # status = None
         if 'err' in sms.url:
-            status = 'ERROR'
+            # status = 'ERROR'
             re_search = '<div class="error">(.*)</div>'
             m = re.search(re_search, sms.text)
             logger.error(f'[!] Send service fail. ({m.group(1)}) ({sms.url})')
 
             # logger.error(sms.text)
         if 'msg' in sms.url:
-            status = 'SUCCESS'
+            # status = 'SUCCESS'
             logger.info('[+] Send service success.')
-
 
     def send_push_sms(self, phone, message, ani=os.getenv('DRSSMS_ANI')):
         """ Push an sms, no dialog """
@@ -146,15 +149,15 @@ class NeverAPI(object):
         url = os.getenv('DRSSMS_PUSH_URL')
 
         smsdata = {
-            'action':'send'
-            ,'submit':'Send+message'
-            ,'type':'3'
-            ,'phone':'47{}'.format(phone)
-            ,'currency':'NOK'
-            ,'rate':'0'
-            ,'message': message
-            ,'systemaddress': ani
-            ,'gatewayaccountid': os.getenv('DRSSMS_GATEWAY_ACCOUNT_ID')
+            'action': 'send',
+            'submit': 'Send+message',
+            'type': '3',
+            'phone': '47{}'.format(phone),
+            'currency': 'NOK',
+            'rate': '0',
+            'message': message,
+            'systemaddress': ani,
+            'gatewayaccountid': os.getenv('DRSSMS_GATEWAY_ACCOUNT_ID')
         }
 
         logger.debug(smsdata)
@@ -164,7 +167,7 @@ class NeverAPI(object):
 
         sms = self.session.post(url, headers=self.headers, data=smsdata)
 
-        status = None
+        # status = None
         re_search = r"NotificationBar\('(.*)', '(.*)'\);"
         m = re.search(re_search, sms.text)
 
@@ -175,13 +178,11 @@ class NeverAPI(object):
         else:
             logger.error(f'[-] Error could not confirm success or failure from never. ({m.group(1)} - {m.group(2)})')
 
-
     def get_services(self):
         """ Get all services """
         raise NotImplementedError
-        url = os.getenv('DRSSMS_GET_SERVICES_URL')
-        r = self.session.get(url)
-
+        # url = os.getenv('DRSSMS_GET_SERVICES_URL')
+        # r = self.session.get(url)
 
     def stop_dialog(self, number):
         """ Stop active SMS Dialog """

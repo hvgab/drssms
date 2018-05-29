@@ -1,4 +1,4 @@
-
+"""CLI for DRSSMS package."""
 from drssms import NeverAPI
 import click
 import logging
@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 @click.group()
 def main():
+    """Enter main script."""
     # napi = NeverAPI()
     # TODO: Move napi up here and use context
     pass
@@ -19,7 +20,7 @@ def main():
 @click.argument('text')
 @click.option('--ani')
 def push(number, text, ani):
-    """ Sent push SMS to number without service. """
+    """Send push SMS to number without service."""
     napi = NeverAPI()
     napi.login()
 
@@ -32,7 +33,7 @@ def push(number, text, ani):
 @click.option('--text', help='SMS text to overwrite service. \
         Remember quotationmarks')
 def service(serviceid, number, text):
-    """ Send service SMS to number, optionally overwrite text """
+    """Send service SMS to number, optionally overwrite text."""
     napi = NeverAPI()
     napi.login()
 
@@ -42,10 +43,9 @@ def service(serviceid, number, text):
 @main.command()
 @click.argument('number')
 def stop(number):
-    """ Stop an active SMS dialog. """
+    """Stop an active SMS dialog."""
     napi = NeverAPI()
     napi.login()
-
     napi.stop_dialog(number)
 
 
@@ -55,13 +55,12 @@ def stop(number):
 @click.option('--filename', help='filename without extension. \
         Default: "sms_dialoger_start-[startdate]-end-[enddate].csv"')
 def download(start, end, filename, name='download-sms'):
-    """ Download sms dialog file.
+    """Download sms dialog file.
 
-        \b
-        No options: get yesterday.
-        Only start: 24hours from start.
-        Start and end: start(inclusive) to end(exclusive).
-     """
+    No options: get yesterday.
+    Only start: 24hours from start.
+    Start and end: start(inclusive) to end(exclusive).
+    """
     napi = NeverAPI()
     napi.login()
 

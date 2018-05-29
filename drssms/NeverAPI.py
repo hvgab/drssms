@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-
-'''
-    Custom DRS API for sms-tjeneste fra Never.
-'''
+"""Custom DRS API for sms-tjeneste fra Never."""
 
 import logging
 import os
@@ -27,6 +23,7 @@ class NeverAPI(object):
         logger.debug('NeverAPI init')
 
     def login(self):
+        """Log in to the web service."""
         logger.debug('[~] login')
 
         if not os.getenv('DRSSMS_USER'):
@@ -39,7 +36,10 @@ class NeverAPI(object):
         logindata = {'u': os.getenv('DRSSMS_USER'), 'p': os.getenv('DRSSMS_PW')}
         # Logger inn
         headers = {'user-agent': self.user_agent}
-        response = self.session.post(os.getenv('DRSSMS_LOGIN_URL'), headers=headers, data=logindata)
+        response = self.session.post(
+                os.getenv('DRSSMS_LOGIN_URL'),
+                headers=headers,
+                data=logindata)
 
     # Finner en cookie vi fikk tilbake
         cookie_resp = response.request.headers['Cookie']
@@ -53,16 +53,18 @@ class NeverAPI(object):
         logger.debug('[+] Logged in')
 
     def download_sms_file(self, start=None, end=None, filename=None, download_path=None):
-        """ Download SMS-Dialog export
-            Args:
-                start: date string in format yyyy-mm-dd
-                end: date string in format yyyy-mm-dd
-                download_path: where to save downloaded file
-            Return:
-                String: Path to saved file.
+        """Download SMS-Dialog export.
+
+        Args:
+            start: date string in format yyyy-mm-dd
+            end: date string in format yyyy-mm-dd
+            download_path: where to save downloaded file
+        Return:
+            String: Path to saved file.
         """
         if not os.getenv('DRSSMS_DOWNLOAD_BASE_URL'):
-            raise ValueError('DRSSMS_DOWNLOAD_BASE_URL not in env vars. Cannot download SMS Dialogs.')
+            raise ValueError('DRSSMS_DOWNLOAD_BASE_URL not in env vars. \
+            Cannot download SMS Dialogs.')
         # from / to i string-format "2018-01-01" uten chickalacka rundt seg.
         if not download_path:
             download_path = self.path
@@ -77,7 +79,18 @@ class NeverAPI(object):
             end = end.date().isoformat()
             logger.debug('end: {}'.format(end))
 
-        url = f'{os.getenv("DRSSMS_DOWNLOAD_BASE_URL")}&from={start}&to={end}&q=&op=messages&action=csv'
+        # url = f'{os.getenv("DRSSMS_DOWNLOAD_BASE_URL")}&from={start}&to={end}&q=&op=messages&action=csv'
+        url = os.getenv("DRSSMS_DOWNLOAD_BASE_URL")
+        payload = {
+            'sid': 0,
+            'cid': 0,
+            'did': 0,
+            'from': start,
+            'to': end,
+            'q': '',
+            'op': 'messages',
+            'action': 'csv'
+        }
         local_filename = filename
         if filename is None:
             local_filename = f'sms_dialoger_start-{start}-end-{end}.csv'
@@ -85,7 +98,7 @@ class NeverAPI(object):
 
         # Kopierer raw bytes rett til fil.
         try:
-            r = self.session.get(url, stream=True)
+            r = self.session.get(url, params=payload, stream=True)
             with open(local_filepath, 'wb') as f:
                 shutil.copyfileobj(r.raw, f)
             logger.info('[+] File successfully downloaded')
@@ -95,12 +108,11 @@ class NeverAPI(object):
             return
 
     def send_service_sms(self, phone, serviceID, message=None):
-        """ Send a service sms.
+        """Send a service sms.
 
-            Includes reminder and confirmation SMS.
-            Initial service message can be overwritten with <message>
+        Includes reminder and confirmation SMS.
+        Initial service message can be overwritten with <message>
         """
-
         logger.debug('[~] Send service SMS')
 
         if message == '':
@@ -133,8 +145,7 @@ class NeverAPI(object):
             logger.info('[+] Send service success.')
 
     def send_push_sms(self, phone, message, ani=os.getenv('DRSSMS_ANI')):
-        """ Push an sms, no dialog """
-
+        """Push an sms, no dialog."""
         logger.debug('[~] Send push')
 
         if not ani or ani == '':
@@ -176,19 +187,22 @@ class NeverAPI(object):
         elif m.group(1) == 'info':
             logger.info(f'[+] Info from Never: {m.group(1)} - {m.group(2)}')
         else:
-            logger.error(f'[-] Error could not confirm success or failure from never. ({m.group(1)} - {m.group(2)})')
+            logger.error(f'[-] Error could not confirm success or failure from never. \
+                    ({m.group(1)} - {m.group(2)})')
 
     def get_services(self):
-        """ Get all services """
+        """Get all services."""
         raise NotImplementedError
         # url = os.getenv('DRSSMS_GET_SERVICES_URL')
         # r = self.session.get(url)
 
     def stop_dialog(self, number):
-        """ Stop active SMS Dialog """
+        """Stop active SMS Dialog."""
         logger.debug('[~] Stop dialog')
 
         if not os.getenv('DRSSMS_STOP_SERVICEID'):
-            raise ValueError('DRSSMS_STOP_SERVICEID not in env. Cannot use shortcut to stop dialog. Try sending stop-service id to send_service_sms()')
+            raise ValueError('DRSSMS_STOP_SERVICEID not in env. \
+                    Cannot use shortcut to stop dialog. \
+                    Try sending stop-service id to send_service_sms()')
 
         self.send_service_sms(number, os.getenv('DRSSMS_STOP_SERVICEID'))

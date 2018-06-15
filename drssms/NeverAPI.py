@@ -15,6 +15,16 @@ class NeverAPI(object):
     """docstring for NeverAPI."""
 
     def __init__(self, path='./', user_agent=os.getenv('DRSSMS_USERAGENT')):
+        """Short summary.
+
+        Args:
+            path (string): Description of parameter `path`. Defaults to './'.
+            user_agent (string): user_agent sent to web-service. Should include some form of contactinfo. Defaults to os.getenv('DRSSMS_USERAGENT').
+
+        Returns:
+            type: Description of returned object.
+
+        """
         super(NeverAPI, self).__init__()
         self.path = path  # gjørra no her ell?
         self.user_agent = user_agent
@@ -23,7 +33,12 @@ class NeverAPI(object):
         logger.debug('NeverAPI init')
 
     def login(self):
-        """Log in to the web service."""
+        """Log in to the web service.
+
+        Returns:
+            None: Set self.headers value and self.logged_in=True
+
+        """
         logger.debug('[~] login')
 
         if not os.getenv('DRSSMS_USER'):
@@ -56,11 +71,14 @@ class NeverAPI(object):
         """Download SMS-Dialog export.
 
         Args:
-            start: date string in format yyyy-mm-dd
-            end: date string in format yyyy-mm-dd
-            download_path: where to save downloaded file
-        Return:
-            String: Path to saved file.
+            start (string): date string in format yyyy-mm-dd. Defaults to None.
+            end (string): date string in format yyyy-mm-dd. Defaults to None.
+            filename (string): Custom name for downloaded file. Defaults to None.
+            download_path (string): Where the downloaded file should be saved. Defaults to None.
+
+        Returns:
+            string: Path to downloaded file.
+
         """
         if not os.getenv('DRSSMS_DOWNLOAD_BASE_URL'):
             raise ValueError('DRSSMS_DOWNLOAD_BASE_URL not in env vars. \
@@ -79,7 +97,6 @@ class NeverAPI(object):
             end = end.date().isoformat()
             logger.debug('end: {}'.format(end))
 
-        # url = f'{os.getenv("DRSSMS_DOWNLOAD_BASE_URL")}&from={start}&to={end}&q=&op=messages&action=csv'
         url = os.getenv("DRSSMS_DOWNLOAD_BASE_URL")
         payload = {
             'sid': 0,
@@ -112,6 +129,15 @@ class NeverAPI(object):
 
         Includes reminder and confirmation SMS.
         Initial service message can be overwritten with <message>
+
+        Args:
+            phone (int): Phonenumber to send SMS to.
+            serviceID (int): ServiceID of text message for reminder and confirmation texts.
+            message (string): Optional text to overwrite initial text of service. Defaults to None.
+
+        Returns:
+            bool: True for success, False for fail.
+
         """
         logger.debug('[~] Send service SMS')
 
@@ -138,14 +164,25 @@ class NeverAPI(object):
             re_search = '<div class="error">(.*)</div>'
             m = re.search(re_search, sms.text)
             logger.error(f'[!] Send service fail. ({m.group(1)}) ({sms.url})')
-
+            return False
             # logger.error(sms.text)
         if 'msg' in sms.url:
             # status = 'SUCCESS'
             logger.info('[+] Send service success.')
+            return True
 
     def send_push_sms(self, phone, message, ani=os.getenv('DRSSMS_ANI')):
-        """Push an sms, no dialog."""
+        """Push an sms, no dialog service.
+
+        Args:
+            phone (type): Description of parameter `phone`.
+            message (type): Description of parameter `message`.
+            ani (type): Description of parameter `ani`. Defaults to os.getenv('DRSSMS_ANI').
+
+        Returns:
+            type: Description of returned object.
+
+        """
         logger.debug('[~] Send push')
 
         if not ani or ani == '':

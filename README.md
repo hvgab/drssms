@@ -3,6 +3,8 @@
 
 ## USAGE
 
+THIS IS OUTDATED
+
 Init
 ```python
 from drssms import NeverAPI
@@ -18,32 +20,20 @@ test_ani = 'Santa Claus'
 
 Download sms file
 Args: start and end date-string.
-Try to limit timeframe to a month here. There might be dragons.
+Try to limit length here. There might be dragons.
 ```python
 napi.download_sms_file('2018-01-01', '2018-02-01')
-napi.download_sms_file('2018-01-01')
-napi.download_sms_file()
 ```
 
 Test service sms
 ```python
-napi.stop_dialog(test_number)  # Stop if open dialog
-napi.send_service_sms(test_number, test_service, message=None)
+napi.stop_dialog(12345678)  # Stop if open dialog
+napi.send_service_sms(test_service, test_number, test_service)
 ```
 
 Test push sms
 ```python
-napi.send_push_sms(test_number, test_text, ani=test_ani)
+napi.send_push_sms(test_number, test_text, ani_text=test_ani)
 ```
-
-## cli script
-
-```
-sms --help
-sms push 12345678 "my message"
-sms service 12345678 10
-sms download_sms
-```
-
 
 That's about it.

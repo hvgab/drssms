@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.0] - 2018-06-18
+
+### Added
+- API server with "hug"
+  - Push and Service is tested and works.
+- Patched some stuff
+- Breaking changes in function-names
+
 ## [1.0.0] - 2018-05-28
 
 ### Added

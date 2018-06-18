@@ -1,12 +1,13 @@
-from drssms import NeverAPI
 import logging
+
 import hug
+from drssms import NeverAPI
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 napi = NeverAPI()
-napi.login()
+# napi.login()
 
 
 @hug.get()
@@ -33,7 +34,6 @@ def push(number: hug.types.number,
          text: hug.types.text,
          ani: hug.types.text = None):
     """ Send push SMS to number without service. """
-
     result = napi.send_push_sms(number, text, ani)
     return dict(result=result)
 
@@ -41,11 +41,10 @@ def push(number: hug.types.number,
 @hug.post()
 def service(number: hug.types.number,
             serviceid: hug.types.number,
-            text: [hug.types.text, hug.types.number] = None):
+            text: hug.types.text = None):
     """ Send service SMS to number, optionally overwrite text """
 
     napi = NeverAPI()
-    napi.login()
     result = napi.send_service_sms(number, serviceid, text)
     print(result)
     return result

@@ -1,6 +1,8 @@
 
 # DRS API FOR NEVER.NO
 
+Downloads sms logs and sends smses via old sms system no longer in use.
+
 ## USAGE
 
 Init
